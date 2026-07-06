@@ -11,25 +11,34 @@ namespace project01.Models
     public class Review
     {
         [Key]
-        public int reviewId { get; set; } // Sys generate 
-        [ForeignKey(nameof(User))]
-        public int userId { get; set; } // User input 
-        [ForeignKey(nameof(Product))]
-
-        public int productId { get; set; } // User input
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int reviewId { get; set; }                 // system generated
 
         [Required]
         [Range(1, 5)]
-        public int rating { get; set; } // User input (e.g., 1-5)
+        public int rating { get; set; }                   // user input 
 
         [MaxLength(1000)]
-        public string comment { get; set; } // User input 
+        public string comment { get; set; }               // user input
+
         [Required]
-        public DateTime reviewDate { get; set; } // Sys generate
+        public DateTime reviewDate { get; set; }           // system generated 
 
-        // Navigation Properties
-        public User User { get; set; }
 
-        public Product Product { get; set; }
+
+
+        // foreign key 
+        [Required]
+        [ForeignKey("user")]
+        public int userId { get; set; }                   
+        public User user { get; set; }                   
+
+
+
+        // foreign key — every review is about exactly one product
+        [Required]
+        [ForeignKey("product")]
+        public int productId { get; set; }               
+
     }
 }

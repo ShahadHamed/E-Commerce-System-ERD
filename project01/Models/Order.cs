@@ -10,31 +10,41 @@ namespace project01.Models
 {
     public class Order
     {
-        public int orderId { get; set; } // Sys generate 
-        [ForeignKey(nameof(User))]
-        public int userId { get; set; } // User input 
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int orderId { get; set; }                  // system generated
 
         [Required]
-        public DateTime orderDate { get; set; } // Sys generate 
+        public DateTime orderDate { get; set; }            // system generated 
 
         [Required]
+        [Column(TypeName = "decimal(10,2)")]
         [Range(0, double.MaxValue)]
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal totalAmount { get; set; } // Calculated based on order items
+        public decimal totalAmount { get; set; }           // calculated 
 
         [Required]
         [MaxLength(30)]
-        public string status { get; set; } // User input (e.g., "Pending", "Shipped", "Delivered")
+        public string status { get; set; } = "Pending";
 
         [Required]
         [MaxLength(300)]
-        public string shippingAddress { get; set; } // User input 
+        public string shippingAddress { get; set; }        // user input
 
         [Required]
         [MaxLength(50)]
-        public string paymentMethod { get; set; } // User input 
+        public string paymentMethod { get; set; }      // user input
 
-        // Navigation Properties
+
+        // foreign key 
+        [Required]
+        [ForeignKey("user")]
+        public int userId { get; set; }
+        public User user { get; set; }
+
+
+        // reverse navigation 
+        public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+
 
     }
 }
