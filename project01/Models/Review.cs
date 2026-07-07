@@ -12,19 +12,17 @@ namespace project01.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int reviewId { get; set; }                 // system generated
+        public int reviewId { get; set; } // system generated
 
         [Required]
         [Range(1, 5)]
-        public int rating { get; set; }                   // user input 
+        public int rating { get; set; }  // user input 
 
         [MaxLength(1000)]
-        public string comment { get; set; }               // user input
+        public string comment { get; set; } // user input
 
         [Required]
-        public DateTime reviewDate { get; set; }           // system generated 
-
-
+        public DateTime reviewDate { get; set; } // system generated 
 
 
         // foreign key 
@@ -34,8 +32,7 @@ namespace project01.Models
         public User user { get; set; }                   
 
 
-
-        // foreign key — every review is about exactly one product
+        // foreign key 
         [Required]
         [ForeignKey("product")]
         public int productId { get; set; }               

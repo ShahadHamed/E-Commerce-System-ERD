@@ -12,15 +12,15 @@ namespace project01.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int orderId { get; set; }                  // system generated
+        public int orderId { get; set; } // system generated
 
         [Required]
-        public DateTime orderDate { get; set; }            // system generated 
+        public DateTime orderDate { get; set; } // system generated 
 
         [Required]
         [Column(TypeName = "decimal(10,2)")]
         [Range(0, double.MaxValue)]
-        public decimal totalAmount { get; set; }           // calculated 
+        public decimal totalAmount { get; set; } // calculated 
 
         [Required]
         [MaxLength(30)]
@@ -28,11 +28,11 @@ namespace project01.Models
 
         [Required]
         [MaxLength(300)]
-        public string shippingAddress { get; set; }        // user input
+        public string shippingAddress { get; set; }  // user input
 
         [Required]
         [MaxLength(50)]
-        public string paymentMethod { get; set; }      // user input
+        public string paymentMethod { get; set; } // user input
 
 
         // foreign key 

@@ -12,16 +12,16 @@ namespace project01.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int orderItemId { get; set; }              // system generated
+        public int orderItemId { get; set; } // system generated
 
         [Required]
         [Range(1, 999)]
-        public int quantity { get; set; }                 // user input
+        public int quantity { get; set; } // user input
 
         // foreign key 
         [Required]
         [ForeignKey("Order")]
-        public int orderId { get; set; }                  // system generated 
+        public int orderId { get; set; } // system generated 
         public Order Order { get; set; }                 
 
         // foreign key 
