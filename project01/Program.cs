@@ -159,7 +159,6 @@ namespace project01
 
 
         //4.Place an Order for a Product----------------------------------------
-
         public static void PlaceOrder()
         {
             Console.WriteLine("\n**--Placing an order for a product...");
@@ -395,10 +394,316 @@ namespace project01
         }
 
 
-        //7.Cancel an Order
+        //7.Cancel an Order----------------------------------------     
+        public static void CancelOrder()
+        {
+            Console.WriteLine("\n**--Cancelling an order...");
+
+            // Display all orders
+            Console.WriteLine("Orders:");
+
+            foreach (Order o in context.Orders)
+                Console.WriteLine($"  ID: {o.orderId}  |  User ID: {o.userId}  |  Status: {o.status}");
+
+            Console.Write("Enter Order ID to cancel: ");
+            int orderId = int.Parse(Console.ReadLine());
+
+            // Find the order
+            Order order = context.Orders.FirstOrDefault(o => o.orderId == orderId);
+            
+            if (order == null)
+            {
+                Console.WriteLine("Order not found!");
+                return;
+            }
+
+            // Check if already cancelled
+            if (order.status == "Cancelled")
+            {
+                Console.WriteLine("This order is already cancelled.");
+                return;
+            }
+
+            // Load all OrderItems for this order
+            List<OrderItem> orderItems = context.OrderItems
+                                                .Where(i => i.orderId == orderId)
+                                                .ToList();
+
+            // Restore stock quantity
+            foreach (OrderItem item in orderItems)
+            {
+                // find the related product
+                Product product = context.Products.FirstOrDefault(p => p.productId == item.productId);
+                
+                // Restore the stock quantity
+                if (product != null)
+                {
+                    product.stockQuantity += item.quantity;
+                }
+            }
+
+            // Update order status
+            order.status = "Cancelled";
+
+            // Save changes to the database
+            context.SaveChanges();
+
+            // Display confirmation
+            Console.WriteLine($"Order cancelled successfully! Order ID: {order.orderId}, New Status: {order.status}");
+        }
 
 
-        //Main method to run the application
+        //8.Delete a Review----------------------------------------     
+        public static void DeleteReview()
+        {
+            Console.WriteLine("\n**--Deleting a review...");
+
+            // Display all reviews
+            Console.WriteLine("Reviews:");
+
+            foreach (Review r in context.Reviews)
+                Console.WriteLine($"  ID: {r.reviewId}  |  User ID: {r.userId}  |  Product ID: {r.productId}  |  Rating: {r.rating}  |  Comment: {r.comment}");
+
+            Console.Write("Enter Review ID to delete: ");
+            int reviewId = int.Parse(Console.ReadLine());
+
+            // Find the review
+            Review review = context.Reviews.FirstOrDefault(r => r.reviewId == reviewId);
+
+            if (review == null)
+            {
+                Console.WriteLine("Review not found!");
+                return;
+            }
+
+            // Delete the review
+            context.Reviews.Remove(review);
+
+            // Save changes to the database
+            context.SaveChanges();
+
+            // Display confirmation
+            Console.WriteLine($"Review deleted successfully! Review ID: {review.reviewId}");
+        }
+
+
+        //9. View All Products (Get All)-----------------------------------------
+        public static void ViewAllProduct()
+        {
+            Console.WriteLine("\n**---View All Products");
+
+            // Get all products
+            List<Product> products = context.Products.ToList();
+
+            if (products.Count == 0)
+            {
+                Console.WriteLine("No products found.");
+                return;
+            }
+
+            foreach (Product product in products)
+            {
+                Console.WriteLine("------------------------------------");
+                Console.WriteLine($"Product ID : {product.productId}");
+                Console.WriteLine($"Name       : {product.productName}");
+                Console.WriteLine($"Price      : {product.price}");
+                Console.WriteLine($"Stock      : {product.stockQuantity}");
+                Console.WriteLine($"Available  : {product.isAvailable}");
+            }
+
+            Console.WriteLine("------------------------------------");
+        }
+
+
+        //10. Filter Products by Category and Price Range-----------------------------------------
+        public static void FilterProductsByCategoryAndPrice()
+        {
+            Console.WriteLine("\n**---Filter Products by Category and Price Range");
+            
+            // Display categories
+            Console.WriteLine("Categories:");
+
+            foreach (Category c in context.Categories)
+            {
+                Console.WriteLine($"ID: {c.categoryId} | {c.categoryName}");
+            }
+
+            // Read filter values
+            Console.Write("\nEnter Category ID: ");
+            int categoryId = int.Parse(Console.ReadLine());
+
+            Console.Write("Enter Minimum Price: ");
+            double minPrice = double.Parse(Console.ReadLine());
+
+            Console.Write("Enter Maximum Price: ");
+            double maxPrice = double.Parse(Console.ReadLine());
+
+            // Filter and sort
+            List<Product> products = context.Products
+                .Where(p => p.categoryId == categoryId
+                         && p.price >= minPrice
+                         && p.price <= maxPrice)
+                .OrderBy(p => p.price)
+                .ToList();
+
+            if (products.Count == 0)
+            {
+                Console.WriteLine("No products found.");
+                return;
+            }
+
+            // Display results
+            Console.WriteLine("\nFiltered Products:");
+
+            foreach (Product product in products)
+            {
+                Console.WriteLine("--------------------------------");
+                Console.WriteLine($"Product ID : {product.productId}");
+                Console.WriteLine($"Name       : {product.productName}");
+                Console.WriteLine($"Price      : {product.price}");
+                Console.WriteLine($"Stock      : {product.stockQuantity}");
+                Console.WriteLine($"Available  : {product.isAvailable}");
+            }
+
+            Console.WriteLine("--------------------------------");
+        }
+
+
+        //11.Get Category with All Its Products (Include)-----------------------------------------
+        public static void GetCategoryWithProducts()
+        {
+            Console.WriteLine("\n**---Get Category with All Its Products");
+            
+            // Display categories
+            Console.WriteLine("Categories:");
+
+            foreach (Category c in context.Categories)
+            {
+                Console.WriteLine($"ID: {c.categoryId} | {c.categoryName}");
+            }
+
+            // Read category ID
+            Console.Write("\nEnter Category ID: ");
+            int categoryId = int.Parse(Console.ReadLine());
+
+            // Get category with products
+            Category category = context.Categories
+                .Include(c => c.Products)
+                .FirstOrDefault(c => c.categoryId == categoryId);
+
+            if (category == null)
+            {
+                Console.WriteLine("Category not found.");
+                return;
+            }
+
+            // Display category and its products
+            Console.WriteLine("\nCategory Details");
+            Console.WriteLine($"\nCategory: {category.categoryName}");
+            Console.WriteLine($"Description: {category.description}");
+
+            // Display products
+            Console.WriteLine("Products:");
+
+            if (category.Products.Count == 0)
+            {
+                Console.WriteLine("No products in this category.");
+                return;
+            }
+
+            foreach (Product product in category.Products)
+            {
+                Console.WriteLine("--------------------------------");
+                Console.WriteLine($"Product ID : {product.productId}");
+                Console.WriteLine($"Name       : {product.productName}");
+                Console.WriteLine($"Price      : {product.price}");
+                Console.WriteLine($"Stock      : {product.stockQuantity}");
+                Console.WriteLine($"Available  : {product.isAvailable}");
+            }
+
+            Console.WriteLine("--------------------------------");
+        }
+
+        //12.  View Order History with Full Details(ThenInclude)-----------------------------------------
+        public static void ViewOrderHistory()
+        {
+            Console.WriteLine("\n**---View Order History with Full Details");
+            
+            // Display users
+            Console.WriteLine("Users:");
+
+            foreach (User u in context.Users)
+            {
+                Console.WriteLine($"ID: {u.userId} | {u.Name}");
+            }
+
+            // Read user ID
+            Console.Write("\nEnter User ID: ");
+            int userId = int.Parse(Console.ReadLine());
+           
+            // Get orders with details
+            List<Order> orders = context.Orders
+                .Where(o => o.userId == userId)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .ToList();
+
+            if (orders.Count == 0)
+            {
+                Console.WriteLine("No orders found for this user.");
+                return;
+            }
+
+            // Display orders and their items
+            foreach (Order order in orders)
+            {
+                Console.WriteLine("--------------------------------");
+                Console.WriteLine($"Order ID: {order.orderId}");
+                Console.WriteLine($"Order Date: {order.orderDate}");
+                Console.WriteLine($"Status: {order.status}");
+                Console.WriteLine($"Total Amount: {order.totalAmount}");
+
+                Console.WriteLine("Order Items:");
+                foreach (OrderItem item in order.OrderItems)
+                {
+                    Console.WriteLine($"  Product: {item.Product.productName} | Quantity: {item.quantity} | Unit Price: {item.unitPrice}");
+                }
+            }
+            Console.WriteLine("--------------------------------");
+        }
+
+        //13.ProductSummaryReport-----------------------------------------
+        public static void ProductSummaryReport()
+        {
+            Console.WriteLine("\n**--Product Summary Report...");
+
+            // Get product summary report
+            var report = context.Products
+                .Select(p => new
+                {
+                    ProductName = p.productName,
+                    CategoryName = p.category.categoryName,
+                    ReviewCount = p.Reviews.Count(),
+                    AvgRating = p.Reviews.Any() ? p.Reviews.Average(r => r.rating) : 0,
+                    Stock = p.stockQuantity
+                })
+                .ToList();
+
+            Console.WriteLine("\nProduct Summary Report");
+
+            foreach (var item in report)
+            {
+                Console.WriteLine("--------------------------------");
+                Console.WriteLine($"Product Name : {item.ProductName}");
+                Console.WriteLine($"Category     : {item.CategoryName}");
+                Console.WriteLine($"Reviews      : {item.ReviewCount}");
+                Console.WriteLine($"Avg Rating   : {item.AvgRating:F2}");
+                Console.WriteLine($"Stock        : {item.Stock}");
+            }
+        }
+
+
+        //Main method to run the application------------------------------------
         static void Main(string[] args)
         {
             bool exit = false;
@@ -412,8 +717,16 @@ namespace project01
                 Console.WriteLine("2. Add Category");
                 Console.WriteLine("3. Add Product");
                 Console.WriteLine("4. Place Order");
-                Console.WriteLine();
-                Console.WriteLine(" 0  - Exit");
+                Console.WriteLine("5. WriteReview");
+                Console.WriteLine("6. Update Product");
+                Console.WriteLine("7. Cancel Order");
+                Console.WriteLine("8. Delete Review");
+                Console.WriteLine("9. View All Products");
+                Console.WriteLine("10. Filter Products by Category and Price Range");
+                Console.WriteLine("11. Get Category with All Its Products");
+                Console.WriteLine("12. View Order History with Full Details");
+                Console.WriteLine("13. Product Summary Report");
+                Console.WriteLine("0. Exit");
                 Console.WriteLine("========================================");
                 Console.Write("Select option: ");
 
@@ -437,15 +750,47 @@ namespace project01
                         PlaceOrder();
                         break;
 
+                    case 5:
+                        WriteReview();
+                        break;
 
+                    case 6:
+                        UpdateProduct();
+                        break;
 
+                    case 7:
+                        CancelOrder();
+                        break;
 
+                    case 8:
+                        DeleteReview();
+                        break;
 
-                    case 0:
+                    case 9:
+                        ViewAllProduct();
+                        break;
+
+                     case 10:
+                        FilterProductsByCategoryAndPrice();
+                        break;
+
+                     case 11:
+                        GetCategoryWithProducts();
+                        break;
+
+                     case 12:
+                        ViewOrderHistory();
+                        break;
+
+                     case 13:
+                        ProductSummaryReport();
+                        break;
+
+                     case 0:
                         exit = true;
                         break;
 
-                    default:
+                     default:
                         Console.WriteLine("Invalid option. Please try again.");
                         break;
                 }
